@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model aluno {
+  id                 Int                @id @default(autoincrement())
+  nome               String             @db.VarChar(255)
+  email              String             @db.VarChar(255)
+  matricula          String             @db.VarChar(100)
+  nivel_instrucao    String             @db.VarChar(50)
+  instituicao_id     Int
+  data_cadastro      DateTime           @default(now()) @db.Timestamp(0)
+  instituicao_ensino instituicao_ensino @relation(fields: [instituicao_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_aluno_instituicao")
+  avaliacao          avaliacao[]
+
+  @@index([instituicao_id], map: "idx_aluno_instituicao")
+}
+
+model avaliacao {
+  id             Int      @id @default(autoincrement())
+  aluno_id       Int
+  projeto_id     Int
+  nota           Decimal  @db.Decimal(5, 2)
+  feedback       String?  @db.Text
+  avaliador_nome String?  @db.VarChar(255)
+  data_avaliacao DateTime @default(now()) @db.Timestamp(0)
+  aluno          aluno    @relation(fields: [aluno_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_avaliacao_aluno")
+  projeto        projeto  @relation(fields: [projeto_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_avaliacao_projeto")
+
+  @@index([aluno_id], map: "idx_avaliacao_aluno")
+  @@index([projeto_id], map: "idx_avaliacao_projeto")
+}
+
+model empresa {
+  id            Int       @id @default(autoincrement())
+  nome          String    @db.VarChar(255)
+  cnpj          String    @db.VarChar(18)
+  setor         String    @db.VarChar(100)
+  contato_nome  String    @db.VarChar(255)
+  contato_email String    @db.VarChar(255)
+  telefone      String?   @db.VarChar(20)
+  site          String?   @db.VarChar(255)
+  projeto       projeto[]
+}
+
+model instituicao_ensino {
+  id            Int       @id @default(autoincrement())
+  nome          String    @db.VarChar(255)
+  sigla         String?   @db.VarChar(50)
+  tipo          String    @db.VarChar(50)
+  endereco      String?   @db.VarChar(500)
+  contato_nome  String    @db.VarChar(255)
+  contato_email String    @db.VarChar(255)
+  telefone      String?   @db.VarChar(20)
+  site          String?   @db.VarChar(255)
+  aluno         aluno[]
+  projeto       projeto[]
+}
+
+model projeto {
+  id                 Int                @id @default(autoincrement())
+  titulo             String             @db.VarChar(255)
+  descricao          String?            @db.Text
+  nivel_dificuldade  String             @db.VarChar(50)
+  empresa_id         Int
+  instituicao_id     Int
+  data_criacao       DateTime           @default(now()) @db.Timestamp(0)
+  avaliacao          avaliacao[]
+  empresa            empresa            @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_projeto_empresa")
+  instituicao_ensino instituicao_ensino @relation(fields: [instituicao_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_projeto_instituicao")
+
+  @@index([empresa_id], map: "idx_projeto_empresa")
+  @@index([instituicao_id], map: "idx_projeto_instituicao")
+}
