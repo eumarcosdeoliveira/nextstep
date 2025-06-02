@@ -1,17 +1,28 @@
-export type AlunoOption = {
-  id: number
-  label: string
+// src/services/aluno.service.ts
+import { get, post, put, del } from './api'
+import { Aluno } from '@/types/aluno'
+
+export function getAllAlunos(): Promise<Aluno[]> {
+  return get<Aluno[]>('/api/alunos')
 }
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL
+export function getAluno(id: string): Promise<Aluno> {
+  return get<Aluno>(`/api/alunos/${id}`)
+}
 
-export async function getAllAlunos(): Promise<AlunoOption[]> {
-  const res = await fetch(`${baseURL}/api/alunos`, { cache: 'no-store' })
-  
-  if (!res.ok) {
-    throw new Error(`Erro ao buscar alunos: ${res.statusText}`)
-  }
+export function createAluno(
+  data: Omit<Aluno, 'id' | 'data_cadastro'> & { data_cadastro: string }
+): Promise<Aluno> {
+  return post<Aluno>('/api/alunos', data)
+}
 
-  const data: { id: number; nome: string }[] = await res.json()
-  return data.map(a => ({ id: a.id, label: a.nome }))
+export function updateAluno(
+  id: string,
+  data: Omit<Aluno, 'id' | 'data_cadastro'> & { data_cadastro: string }
+): Promise<Aluno> {
+  return put<Aluno>(`/api/alunos/${id}`, data)
+}
+
+export function deleteAluno(id: string): Promise<void> {
+  return del<void>(`/api/alunos/${id}`)
 }

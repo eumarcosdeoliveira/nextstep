@@ -1,16 +1,16 @@
-// src/components/ui/Sidebar.tsx
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { usePathname } from 'next/navigation'
+import { signOut } from 'next-auth/react'
 import {
   HomeIcon,
   UserGroupIcon,
-  ListBulletIcon,      // ← substitui ClipboardListIcon
+  ListBulletIcon,
   BuildingLibraryIcon,
   ClipboardIcon,
-  Bars3Icon,          // ← substitui MenuIcon
-  XMarkIcon,          // ← substitui XIcon
+  ArrowRightOnRectangleIcon, // ícone de logout
 } from '@heroicons/react/24/outline'
 
 interface NavLink {
@@ -20,69 +20,92 @@ interface NavLink {
 }
 
 const links: NavLink[] = [
-  { href: '/dashboard',     label: 'Home',       icon: HomeIcon },
-  { href: '/alunos',        label: 'Alunos',     icon: UserGroupIcon },
-  { href: '/avaliacoes',    label: 'Avaliações', icon: ListBulletIcon }, // <--
-  { href: '/empresas',      label: 'Empresas',   icon: BuildingLibraryIcon },
-  { href: '/projetos',      label: 'Projetos',   icon: ClipboardIcon },
+  { href: '/dashboard',            label: 'Home',       icon: HomeIcon },
+  { href: '/dashboard/alunos',     label: 'Alunos',     icon: UserGroupIcon },
+  { href: '/dashboard/avaliacoes', label: 'Avaliações', icon: ListBulletIcon },
+  { href: '/dashboard/empresas',   label: 'Empresas',   icon: BuildingLibraryIcon },
+  { href: '/dashboard/projetos',   label: 'Projetos',   icon: ClipboardIcon },
 ]
 
 export default function Sidebar() {
-  const [open, setOpen] = useState(false)
+  const pathname = usePathname()
 
   return (
+    
     <aside
       className={`
-        fixed top-0 left-0 h-screen bg-white shadow-md 
-        transition-[width] duration-300 ease-in-out
-        ${open ? 'w-64' : 'w-16'}
+         top-4 left-4 h-[calc(100vh-2rem)] bg-white
+        rounded-2xl shadow-lg border border-gray-200
+        flex flex-col transition-[width] duration-300 ease-in-out
+        w-16 hover:w-64 group overflow-visible absolute z-10 
       `}
     >
-      {/* header do sidebar: logo + toggle */}
-      <div className="flex items-center justify-between p-4">
-        <img
-          src="/logo.png"
-          alt="Logo"
+
+      {/* HEADER */}
+      <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
+        <Image
+          src="/icon.svg"
+          alt="Logo NextStep"
           width={32}
           height={32}
-          className={`transition-opacity duration-300 ${
-            open ? 'opacity-100' : 'opacity-0'
-          }`}
+          className="object-contain mt-1 mb-4"
         />
-        <button
-          onClick={() => setOpen(!open)}
-          className="p-1 rounded hover:bg-gray-200 focus:outline-none"
-        >
-          {open ? (
-            <XMarkIcon className="h-6 w-6" />
-          ) : (
-            <Bars3Icon className="h-6 w-6" />
-          )}
-        </button>
+        
       </div>
 
-      {/* links de navegação */}
-      <nav className="mt-6 flex flex-col space-y-1">
-        {links.map(({ href, label, icon: Icon }) => (
-          <Link
-            href={href}
-            key={href}
-            className={`
-              flex items-center gap-3 px-4 py-2 rounded-md 
-              hover:bg-gray-100 transition-colors
-            `}
-          >
-            <Icon className="h-6 w-6" />
-            <span
-              className={`whitespace-nowrap transition-opacity duration-300 ${
-                open ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              {label}
-            </span>
-          </Link>
-        ))}
+      {/* LINKS */}
+      <nav className="mt-4 flex flex-col px-2 space-y-1 flex-1">
+        {links.map(({ href, label, icon: Icon }) => {
+          const isActive =
+            pathname === href || pathname?.startsWith(href + '/')
+          return (
+            <Link href={href} key={href} passHref>
+              <div
+                className={`
+                  group relative flex cursor-pointer select-none items-center gap-4
+                  px-3 py-2 rounded-lg transition-colors
+                  ${isActive
+                    ? 'bg-blue-50 text-blue-700'
+                    : 'text-gray-700 hover:bg-gray-50'}
+                `}
+              >
+                <Icon
+                  className={`h-6 w-6 flex-shrink-0 ${
+                    isActive ? 'text-blue-600' : 'text-gray-500'
+                  }`}
+                />
+                <span
+                  className={`
+                    whitespace-nowrap transition-opacity duration-300
+                    opacity-0 group-hover:opacity-100
+                  `}
+                >
+                  {label}
+                </span>
+              </div>
+            </Link>
+          )
+        })}
+        {/* Espaço para empurrar o botão logout para o fim */}
+        <div className="flex-1" />
       </nav>
+
+      {/* BOTÃO DE LOGOUT */}
+      <div className="px-2 pb-4 mt-2">
+        <button
+          onClick={() => signOut({ callbackUrl: '/auth/login' })}
+          className={`
+            group flex items-center gap-3 w-full px-3 py-2 rounded-lg
+            text-gray-500 hover:text-red-600 hover:bg-red-50 transition
+            font-semibold
+          `}
+        >
+          <ArrowRightOnRectangleIcon className="h-6 w-6" />
+          <span className="transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+            Sair
+          </span>
+        </button>
+      </div>
     </aside>
   )
 }

@@ -1,26 +1,28 @@
-// src/services/aluno.service.ts
+// src/services/empresa.service.ts
 import { get, post, put, del } from './api'
-import { Aluno } from '@/types/aluno'
+import { Empresa } from '@/types/empresa'
 
-export function getAlunos(): Promise<Aluno[]> {
-  return get<Aluno[]>('/api/alunos')
+export function getEmpresas(): Promise<Empresa[]> {
+  return get<Empresa[]>('/api/empresas')
 }
 
-export function getAluno(id: string): Promise<Aluno> {
-  return get<Aluno>(`/api/alunos/${id}`)
+export function getEmpresa(id: string): Promise<Empresa> {
+  return get<Empresa>(`/api/empresas/${id}`)
 }
 
-export function createAluno(data: Omit<Aluno, 'id' | 'data_cadastro'> & { data_cadastro: string }): Promise<Aluno> {
-  return post<Aluno>('/api/alunos', data)
+export function createEmpresa(
+  data: Omit<Empresa, 'id'>
+): Promise<Empresa> {
+  return post<Empresa>('/api/empresas', data)
 }
 
-export function updateAluno(
+export function updateEmpresa(
   id: string,
-  data: Omit<Aluno, 'id' | 'data_cadastro'> & { data_cadastro: string }
-): Promise<Aluno> {
-  return put<Aluno>(`/api/alunos/${id}`, data)
+  data: Omit<Empresa, 'id'>
+): Promise<Empresa> {
+  return put<Empresa>(`/api/empresas/${id}`, data)
 }
 
-export function deleteAluno(id: string): Promise<void> {
-  return del<void>(`/api/alunos/${id}`)
+export function deleteEmpresa(id: string): Promise<void> {
+  return del<void>(`/api/empresas/${id}`)
 }

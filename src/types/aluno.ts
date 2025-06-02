@@ -1,23 +1,15 @@
 // src/types/aluno.ts
 export interface Aluno {
-  /** Identificador único */
-  id: string
-
-  /** Nome completo */
+  id: number
   nome: string
-
-  /** E-mail de acesso */
   email: string
-
-  /** Número de matrícula */
   matricula: string
-
-  /** Nível de instrução (e.g. "Graduação", "Pós") */
   nivel_instrucao: string
+  instituicao_id: number
+  data_cadastro: string   // ou Date, conforme você preferir
+}
 
-  /** ID da instituição à qual o aluno pertence */
-  instituicao_id: string
-
-  /** Timestamp de cadastro */
-  data_cadastro: string
+export interface AlunoOption {
+  value: number
+  label: string
 }
