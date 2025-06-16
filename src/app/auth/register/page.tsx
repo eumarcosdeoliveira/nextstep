@@ -1,11 +1,15 @@
 // src/app/auth/register/page.tsx
 'use client'
+import { useRouter } from 'next/navigation' // Importe useRouter
 import Image from 'next/image'
 import Link from 'next/link'
-import RegisterForm from '@/components/auth/RegisterForm' // assume este componente existe
-import { Eye, EyeOff } from 'lucide-react' // se necessário para o RegisterForm
 
-export default function RegisterPage() {
+export default function RegisterPage() { // Renomeado de ChooseRolePage para RegisterPage
+  const router = useRouter()
+
+  const placeholderGradientClasses =
+    'bg-gradient-to-r from-blue-600 to-green-400 bg-clip-text text-transparent' // Classe do gradiente para reutilizar
+
   return (
     <div className="flex h-screen bg-white font-sans">
       <div className="flex flex-1 h-screen px-16 space-x-12">
@@ -19,8 +23,8 @@ export default function RegisterPage() {
           <p className="text-sm text-gray-500">
             Se você já possui uma conta, você pode{' '}
             <Link
-              href="/auth/login"
-              className="font-semibold bg-gradient-to-r from-blue-600 to-green-400 bg-clip-text text-transparent hover:underline"
+              href="/auth/login" // Link correto para o login
+              className={`font-semibold ${placeholderGradientClasses} hover:underline`} // Reutilizando a classe
             >
               ENTRAR
             </Link>
@@ -38,13 +42,24 @@ export default function RegisterPage() {
           />
         </div>
 
-        {/* 3. Formulário centralizado verticalmente */}
+        {/* 3. Formulário centralizado verticalmente - AGORA COM OS BOTÕES DE ESCOLHA */}
         <div className="flex w-2/4 items-center justify-center">
-          <div className="w-full max-w-md space-y-8">
-            {/* Componente de Registro */}
-            <RegisterForm />
+          <div className="w-full max-w-md space-y-8 p-8 text-center"> {/* Adicionado bg e shadow para destaque */}
+            <div className="space-y-6">
+              <button
+                onClick={() => router.push('/auth/register/empresa')}
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-green-400 text-white text-lg font-medium shadow-xl hover:opacity-95 transition-opacity"
+              >
+                Eu sou uma Empresa
+              </button>
 
-
+              <button
+                onClick={() => router.push('/auth/register/instituicao')}
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-400 text-white text-lg font-medium shadow-xl hover:opacity-95 transition-opacity"
+              >
+                Eu sou uma Instituição de Ensino
+              </button>
+            </div>
           </div>
         </div>
       </div>

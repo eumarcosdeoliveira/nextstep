@@ -5,14 +5,24 @@ import bcrypt from 'bcrypt'
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password, confirmPassword } = await request.json()
+    const { name, email, password, confirmPassword, phone, document, role } = await request.json()
+
+    console.log('Dados recebidos no backend /api/register:', { name, email, password, confirmPassword, phone, document, role }); // ADICIONE ESTA LINHA
 
     // 1) Validação de campos obrigatórios
-    if (!name || !email || !password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword || !role) {
       return NextResponse.json(
-        { error: 'Nome, e-mail e ambas as senhas são obrigatórios.' },
+        { error: 'Nome, e-mail, senhas e tipo de perfil são obrigatórios.' },
         { status: 400 }
       )
+    }
+
+    // Valide phone e document se forem obrigatórios (ajuste conforme a necessidade)
+    if (!phone) {
+        return NextResponse.json({ error: 'Telefone é obrigatório.' }, { status: 400 });
+    }
+    if (!document) {
+        return NextResponse.json({ error: 'Documento (CNPJ/CPF) é obrigatório.' }, { status: 400 });
     }
 
     // 2) Verificar se as senhas coincidem
@@ -35,19 +45,22 @@ export async function POST(request: Request) {
     // 4) Hash da senha
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // 5) Criar usuário no banco (somente campos que existem no schema: name, email, password)
+    // 5) Criar usuário no banco (inclua phone, document e role)
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        // role, emailVerified, image e createdAt são preenchidos pelos defaults do schema
+        phone,
+        document,
+        role, // Salva o role do usuário
+        // emailVerified, image e createdAt são preenchidos pelos defaults do schema
       },
     })
 
     // 6) Responder sem retornar a senha
     return NextResponse.json(
-      { id: user.id, email: user.email, name: user.name },
+      { id: user.id, email: user.email, name: user.name, role: user.role }, // Retorna o role
       { status: 201 }
     )
   } catch (err) {

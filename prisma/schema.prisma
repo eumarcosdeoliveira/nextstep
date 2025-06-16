@@ -113,10 +113,12 @@ model User {
   name          String?   @db.VarChar(255)
   email         String    @unique(map: "User_email_unique") @db.VarChar(255)
   password      String?   @db.VarChar(255)
-  role          User_role @default(empresa)
+  role          String    @default("user")
   emailVerified DateTime? @db.DateTime(0)
   image         String?   @db.VarChar(255)
   createdAt     DateTime  @default(now()) @db.DateTime(0)
+  phone         String?   @db.VarChar(20)
+  document      String?   @db.VarChar(18)
   Account       Account[]
   Session       Session[]
 }
@@ -127,10 +129,4 @@ model VerificationToken {
   expires    DateTime @db.DateTime(0)
 
   @@id([identifier, token])
-}
-
-enum User_role {
-  empresa
-  adm_instituicao
-  docente_instituicao
 }
