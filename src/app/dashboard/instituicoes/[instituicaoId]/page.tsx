@@ -28,9 +28,10 @@ async function fetchInstituicao(id: string): Promise<Instituicao> {
 export default async function InstituicaoDetailsPage({
   params,
 }: {
-  params: { instituicaoId: string }
+  params: Promise<{ instituicaoId: string }>
 }) {
-  const inst = await fetchInstituicao(params.instituicaoId)
+  const { instituicaoId } = await params
+  const inst = await fetchInstituicao(instituicaoId)
 
   return (
     <div className="p-8 space-y-6">

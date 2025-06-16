@@ -11,9 +11,10 @@ async function fetchAluno(id: string): Promise<Aluno> {
 export default async function AlunoDetailsPage({
   params,
 }: {
-  params: { alunoId: string }
+  params: Promise<{ alunoId: string }>
 }) {
-  const al = await fetchAluno(params.alunoId)
+  const { alunoId } = await params
+  const al = await fetchAluno(alunoId)
 
   return (
     <div className="p-8 space-y-6">

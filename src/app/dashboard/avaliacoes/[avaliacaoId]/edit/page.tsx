@@ -6,7 +6,7 @@ import { Avaliacao } from '@/types/avaliacao'
 export default function EditAvaliacaoPage() {
   const router = useRouter()
   const { avaliacaoId } = useParams()
-  const [form, setForm] = useState<Omit<Avaliacao, 'data_avaliacao'> | null>(null)
+  const [form, setForm] = useState<any>(null)
   const [error, setError] = useState('')
 
   useEffect(() => {

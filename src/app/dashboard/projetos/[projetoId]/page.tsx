@@ -11,9 +11,10 @@ async function fetchProjeto(id: string): Promise<Projeto> {
 export default async function ProjetoDetailsPage({
   params,
 }: {
-  params: { projetoId: string }
+  params: Promise<{ projetoId: string }>
 }) {
-  const proj = await fetchProjeto(params.projetoId)
+  const { projetoId } = await params
+  const proj = await fetchProjeto(projetoId)
 
   return (
     <div className="p-8 space-y-6">

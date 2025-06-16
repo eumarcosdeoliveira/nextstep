@@ -11,9 +11,10 @@ async function fetchAvaliacao(id: string): Promise<Avaliacao> {
 export default async function AvaliacaoDetailsPage({
   params,
 }: {
-  params: { avaliacaoId: string }
+  params: Promise<{ avaliacaoId: string }>
 }) {
-  const av = await fetchAvaliacao(params.avaliacaoId)
+  const { avaliacaoId } = await params
+  const av = await fetchAvaliacao(avaliacaoId)
 
   return (
     <div className="p-8 space-y-6">

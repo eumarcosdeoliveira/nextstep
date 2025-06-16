@@ -20,8 +20,8 @@ export async function POST(request: Request) {
   const data = await request.json()
   const created = await prisma.avaliacao.create({
     data: {
-      alunoId: data.alunoId,
-      projetoId: data.projetoId,
+      aluno_id: data.aluno_id,
+      projeto_id: data.projeto_id,
       nota: data.nota,
       feedback: data.feedback,
       avaliador_nome: data.avaliador_nome

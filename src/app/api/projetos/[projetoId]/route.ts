@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db'
 
 export async function GET(
   request: Request,
-  { params }: { params: { projetoId: string } }
+  { params }: any
 ) {
   const id = Number(params.projetoId)
   const projeto = await prisma.projeto.findUnique({ where: { id } })
@@ -14,7 +14,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { projetoId: string } }
+  { params }: any
 ) {
   const id = Number(params.projetoId)
   const data = await request.json()
@@ -24,7 +24,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { projetoId: string } }
+  { params }: any
 ) {
   const id = Number(params.projetoId)
   await prisma.projeto.delete({ where: { id } })

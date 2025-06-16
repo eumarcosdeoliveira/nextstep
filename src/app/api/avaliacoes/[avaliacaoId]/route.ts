@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db'
 
 export async function GET(
   request: Request,
-  { params }: { params: { avaliacaoId: string } }
+  { params }: any
 ) {
   const id = Number(params.avaliacaoId)
   const av = await prisma.avaliacao.findUnique({
@@ -20,15 +20,15 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { avaliacaoId: string } }
+  { params }: any
 ) {
   const id = Number(params.avaliacaoId)
   const data = await request.json()
   const updated = await prisma.avaliacao.update({
     where: { id },
     data: {
-      alunoId: data.alunoId,
-      projetoId: data.projetoId,
+      aluno_id: data.aluno_id,
+      projeto_id: data.projeto_id,
       nota: data.nota,
       feedback: data.feedback,
       avaliador_nome: data.avaliador_nome
@@ -46,7 +46,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { avaliacaoId: string } }
+  { params }: any
 ) {
   const id = Number(params.avaliacaoId)
   await prisma.avaliacao.delete({ where: { id } })
