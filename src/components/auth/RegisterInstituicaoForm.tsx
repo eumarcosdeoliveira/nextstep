@@ -435,8 +435,8 @@ export default function RegisterInstituicaoForm() {
         <p className="text-sm text-gray-500">
           Não é uma instituição?{' '}
           <Link
-            href="/auth/choose-role"
-            className={`font-semibold bg-gradient-to-r from-blue-600 to-green-400 bg-clip-text text-transparent hover:underline`}
+            href="/auth/register"
+            className={`font-semibold ${placeholderGradientClasses} hover:underline`}
           >
             Voltar
           </Link>

@@ -11,7 +11,7 @@ export default function RegisterInstituicaoPage() {
     <div className="flex h-screen bg-white font-sans">
       <div className="flex flex-1 h-screen px-16 space-x-12">
         {/* 1. Logo e textos: topo */}
-        <div className="flex flex-col w-1/3 pt-20 space-y-14">
+        <div className="flex flex-col w-2/4 pt-20 space-y-14">
           <Image src="/logo.png" alt="nextstep" width={160} height={40} />
           <div className="space-y-4">
             <h1 className="text-4xl font-bold">Cadastro de Instituição</h1>
