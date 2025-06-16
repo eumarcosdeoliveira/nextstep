@@ -2,6 +2,8 @@
 
 export interface Avaliacao {
   id: number
+  aluno_id: number
+  projeto_id: number
   nota: number
   feedback: string
   avaliador_nome: string
@@ -19,8 +21,8 @@ export interface Avaliacao {
 
 // Se você quiser tipos auxiliares para criar/atualizar:
 export type AvaliacaoCreateInput = {
-  alunoId: number
-  projetoId: number
+  aluno_id: number
+  projeto_id: number
   nota: number
   feedback: string
   avaliador_nome: string

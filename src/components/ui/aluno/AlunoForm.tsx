@@ -21,7 +21,7 @@ export default function AlunoForm({
     email: initialData.email || '',
     matricula: initialData.matricula || '',
     nivel_instrucao: initialData.nivel_instrucao || 'Graduação',
-    instituicao_id: initialData.instituicao_id || '',
+    instituicao_id: initialData.instituicao_id ?? 0,
   })
 
   function handleChange(

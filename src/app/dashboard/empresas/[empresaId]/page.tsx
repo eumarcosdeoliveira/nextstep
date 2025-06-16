@@ -11,9 +11,10 @@ async function fetchEmpresa(id: string): Promise<Empresa> {
 export default async function EmpresaDetailsPage({
   params,
 }: {
-  params: { empresaId: string }
+  params: Promise<{ empresaId: string }>
 }) {
-  const emp = await fetchEmpresa(params.empresaId)
+  const { empresaId } = await params
+  const emp = await fetchEmpresa(empresaId)
 
   return (
     <div className="p-8 space-y-6">

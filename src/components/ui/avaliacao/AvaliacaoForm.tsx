@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
 import { Select } from '@/components/ui/Select'
-import { getAllAlunos, AlunoOption } from '@/services/aluno.service'
+import { getAllAlunos } from '@/services/aluno.service'
+import type { AlunoOption } from '@/types/aluno'
 import { getAllProjetos, ProjetoOption } from '@/services/projeto.service'
 
 export interface AvaliacaoFormValues {
@@ -39,7 +40,9 @@ export default function AvaliacaoForm({
   })
 
   useEffect(() => {
-    getAllAlunos().then(setAlunos)
+    getAllAlunos().then((as) =>
+      setAlunos(as.map((a) => ({ value: a.id, label: a.nome })))
+    )
     getAllProjetos().then(setProjetos)
   }, [])
 
@@ -75,7 +78,7 @@ export default function AvaliacaoForm({
             Selecione um aluno
           </option>
           {alunos.map((a) => (
-            <option key={a.id} value={a.id}>
+            <option key={a.value} value={a.value}>
               {a.label}
             </option>
           ))}
