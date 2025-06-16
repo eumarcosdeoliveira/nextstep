@@ -1,46 +1,38 @@
-// src/app/instituicoes/[instituicaoId]/page.tsx
+// src/app/dashboard/instituicoes/[instituicaoId]/page.tsx
+
+import React from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Instituicao } from '@/types/instituicao'
+import { prisma } from '@/lib/db'
 
-/**
- * Base URL absoluta para chamadas de API no servidor.
- * Usa NEXT_PUBLIC_API_URL se definido, caso contrário assume localhost.
- */
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ||
-  `http://localhost:${process.env.PORT ?? 3000}`
-
-/**
- * Busca uma instituição pelo ID. Em caso de falha retorna notFound(),
- * que dispara o render da página 404.
- */
-async function fetchInstituicao(id: string): Promise<Instituicao> {
-  const res = await fetch(`${BASE_URL}/api/instituicoes/${id}`, {
-    next: { revalidate: 60 }, // revalida a cada 60 segundos
-  })
-  if (!res.ok) {
-    return notFound()
-  }
-  return (await res.json()) as Instituicao
+interface PageProps {
+  /** No App Router do Next.js 15+, params vem como Promise */
+  params: Promise<{ instituicaoId: string }>
 }
 
-export default async function InstituicaoDetailsPage({
-  params,
-}: {
-  params: { instituicaoId: string }
-}) {
-  const inst = await fetchInstituicao(params.instituicaoId)
+export default async function InstituicaoDashboardPage({ params }: PageProps) {
+  // aguardamos a promise para extrair o ID
+  const { instituicaoId } = await params
+  const id = Number(instituicaoId)
+
+  // buscamos direto no banco (Server Component)
+  const inst = await prisma.instituicao_ensino.findUnique({
+    where: { id },
+  })
+
+  if (!inst) {
+    // dispara a página 404 do Next
+    notFound()
+  }
 
   return (
     <div className="p-8 space-y-6">
       <header className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">{inst.nome}</h1>
-        <Link
-          href="/instituicoes"
-          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-        >
-          Voltar
+        <Link href="/dashboard/instituicoes">
+          <button className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+            ← Voltar
+          </button>
         </Link>
       </header>
 
@@ -60,7 +52,13 @@ export default async function InstituicaoDetailsPage({
         <div>
           <dt className="font-semibold">Contato</dt>
           <dd>
-            {inst.contato_nome} — {inst.contato_email}
+            {inst.contato_nome} —{' '}
+            <a
+              href={`mailto:${inst.contato_email}`}
+              className="text-blue-600 hover:underline"
+            >
+              {inst.contato_email}
+            </a>
           </dd>
         </div>
         {inst.telefone && (
@@ -87,11 +85,10 @@ export default async function InstituicaoDetailsPage({
       </dl>
 
       <div className="pt-4">
-        <Link
-          href={`/instituicoes/${inst.id}/edit`}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Editar
+        <Link href={`/dashboard/instituicoes/${inst.id}/edit`}>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Editar
+          </button>
         </Link>
       </div>
     </div>

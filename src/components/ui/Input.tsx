@@ -3,20 +3,31 @@
 
 import React from 'react'
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  /** Se quiser, pode passar um label para ser renderizado acima do campo */
+  label?: string
+  className?: string
+}
 
-export function Input({ className = '', ...props }: InputProps) {
+export function Input({ label, className = '', ...props }: InputProps) {
   return (
-    <input
-      className={`
-        w-full
-        border border-gray-300
-        rounded
-        px-3 py-2
-        focus:outline-none focus:ring-2 focus:ring-blue-500
-        ${className}
-      `}
-      {...props}
-    />
+    <div>
+      {label && (
+        <label
+          htmlFor={props.id}
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
+          {label}
+        </label>
+      )}
+      <input
+        className={`
+          block w-full rounded-md border-gray-300 shadow-sm
+          focus:border-blue-500 focus:ring-blue-500 sm:text-sm
+          ${className}
+        `}
+        {...props}
+      />
+    </div>
   )
 }

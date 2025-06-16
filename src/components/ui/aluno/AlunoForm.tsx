@@ -1,34 +1,51 @@
-// src/components/aluno/AlunoForm.tsx
 'use client'
-import { useState } from 'react'
-import { Aluno } from '@/types/aluno'
 
-export type AlunoFormData = Omit<Aluno, 'id' | 'data_cadastro'>
+import React, { useState } from 'react'
+import { Input } from '@/components/ui/Input'
+import { Select } from '@/components/ui/Select'
+import { Button } from '@/components/ui/Button'
+import { Instituicao } from '@/types/instituicao'
+
+export interface AlunoFormData {
+  nome: string
+  email: string
+  matricula: string
+  nivel_instrucao: string
+  instituicao_id: number
+}
 
 interface AlunoFormProps {
   initialData?: Partial<AlunoFormData>
-  onSubmit: (data: AlunoFormData) => void
+  instituicoes: Instituicao[]
+  onSubmit(data: AlunoFormData): void
   submitLabel?: string
 }
 
 export default function AlunoForm({
   initialData = {},
+  instituicoes,
   onSubmit,
   submitLabel = 'Salvar',
 }: AlunoFormProps) {
   const [form, setForm] = useState<AlunoFormData>({
-    nome: initialData.nome || '',
-    email: initialData.email || '',
-    matricula: initialData.matricula || '',
-    nivel_instrucao: initialData.nivel_instrucao || 'Graduação',
-    instituicao_id: initialData.instituicao_id || '',
+    nome: initialData.nome ?? '',
+    email: initialData.email ?? '',
+    matricula: initialData.matricula ?? '',
+    nivel_instrucao: initialData.nivel_instrucao ?? 'Graduação',
+    instituicao_id: initialData.instituicao_id ?? 0,
   })
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) {
     const { name, value } = e.target
-    setForm((f) => ({ ...f, [name]: value }))
+    setForm((f) => ({
+      ...f,
+      [name]:
+        name === 'instituicao_id'
+          ? Number(value)
+          : value,
+    } as any))
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -37,73 +54,95 @@ export default function AlunoForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-4">
-      <label className="block">
-        <span className="font-medium">Nome *</span>
-        <input
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div>
+        <label htmlFor="nome" className="block mb-1 font-medium">
+          Nome *
+        </label>
+        <Input
+          id="nome"
           name="nome"
+          placeholder="Digite o nome completo"
           value={form.nome}
           onChange={handleChange}
           required
-          className="mt-1 block w-full border-gray-300 rounded"
         />
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="font-medium">E-mail *</span>
-        <input
+      <div>
+        <label htmlFor="email" className="block mb-1 font-medium">
+          E-mail *
+        </label>
+        <Input
+          id="email"
           name="email"
           type="email"
+          placeholder="seu@email.com"
           value={form.email}
           onChange={handleChange}
           required
-          className="mt-1 block w-full border-gray-300 rounded"
         />
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="font-medium">Matrícula *</span>
-        <input
+      <div>
+        <label htmlFor="matricula" className="block mb-1 font-medium">
+          Matrícula *
+        </label>
+        <Input
+          id="matricula"
           name="matricula"
+          placeholder="00000000"
           value={form.matricula}
           onChange={handleChange}
           required
-          className="mt-1 block w-full border-gray-300 rounded"
         />
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="font-medium">Nível de Instrução *</span>
-        <select
+      <div>
+        <label htmlFor="nivel_instrucao" className="block mb-1 font-medium">
+          Nível de Instrução *
+        </label>
+        <Select
+          id="nivel_instrucao"
           name="nivel_instrucao"
           value={form.nivel_instrucao}
           onChange={handleChange}
           required
-          className="mt-1 block w-full border-gray-300 rounded"
         >
-          <option>Graduação</option>
-          <option>Pós</option>
-          <option>Mestrado</option>
-          <option>Doutorado</option>
-        </select>
-      </label>
+          <option value="Graduação">Graduação</option>
+          <option value="Pós">Pós</option>
+          <option value="Mestrado">Mestrado</option>
+          <option value="Doutorado">Doutorado</option>
+        </Select>
+      </div>
 
-      <label className="block">
-        <span className="font-medium">Instituição ID *</span>
-        <input
+      <div>
+        <label htmlFor="instituicao_id" className="block mb-1 font-medium">
+          Instituição de Ensino *
+        </label>
+        <Select
+          id="instituicao_id"
           name="instituicao_id"
-          value={form.instituicao_id}
+          value={String(form.instituicao_id)}
           onChange={handleChange}
           required
-          className="mt-1 block w-full border-gray-300 rounded"
-        />
-      </label>
+        >
+          <option value="" disabled>
+            Selecione uma instituição
+          </option>
+          {instituicoes.map((inst) => (
+            <option key={inst.id} value={inst.id}>
+              {inst.nome}
+            </option>
+          ))}
+        </Select>
+      </div>
 
-      <button
-        type="submit"
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        {submitLabel}
-      </button>
+      <div className="pt-4">
+        <Button type="submit" fullWidth>
+          {submitLabel}
+        </Button>
+      </div>
     </form>
-)}
+  )
+}

@@ -3,21 +3,32 @@
 
 import React from 'react'
 
-interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {}
+const baseClasses =
+  'w-full bg-indigo-50 rounded-xl py-4 px-6 text-gray-900 placeholder-gray-400 ' +
+  'focus:outline-none focus:ring-2 focus:ring-blue-400'
 
-export function Select({ className = '', ...props }: SelectProps) {
+export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  /** Se passado, renderiza essas opções; senão, renderiza children */
+  options?: { value: string | number; label: string }[]
+  className?: string
+  children?: React.ReactNode
+}
+
+export function Select({
+  options,
+  children,
+  className = '',
+  ...props
+}: SelectProps) {
   return (
-    <select
-      className={`
-        w-full
-        border border-gray-300
-        rounded
-        px-3 py-2
-        bg-white
-        focus:outline-none focus:ring-2 focus:ring-blue-500
-        ${className}
-      `}
-      {...props}
-    />
+    <select className={`${baseClasses} ${className}`} {...props}>
+      {options
+        ? options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))
+        : children}
+    </select>
   )
 }

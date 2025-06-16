@@ -1,27 +1,33 @@
-// src/app/empresas/[empresaId]/page.tsx
-import Link from 'next/link'
-import { Empresa } from '@/types/empresa'
+// src/app/dashboard/empresas/[empresaId]/page.tsx
 
-async function fetchEmpresa(id: string): Promise<Empresa> {
-  const res = await fetch(`/api/empresas/${id}`, { cache: 'no-store' })
-  if (!res.ok) throw new Error('Falha ao buscar empresa')
-  return res.json()
+import React from 'react'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { prisma } from '@/lib/db'
+
+interface PageProps {
+  params: Promise<{ empresaId: string }>
 }
 
-export default async function EmpresaDetailsPage({
-  params,
-}: {
-  params: { empresaId: string }
-}) {
-  const emp = await fetchEmpresa(params.empresaId)
+export default async function EmpresaDashboardPage({ params }: PageProps) {
+  // aguardamos a resolução de params para extrair o ID
+  const { empresaId } = await params
+  const id = Number(empresaId)
+
+  // busca direta no banco (Server Component)
+  const emp = await prisma.empresa.findUnique({ where: { id } })
+  if (!emp) {
+    // se não existir, renderiza a 404 do Next
+    notFound()
+  }
 
   return (
     <div className="p-8 space-y-6">
       <header className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">{emp.nome}</h1>
-        <Link href="/empresas">
+        <Link href="/dashboard/empresas">
           <button className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
-            Voltar
+            ← Voltar
           </button>
         </Link>
       </header>
@@ -37,7 +43,12 @@ export default async function EmpresaDetailsPage({
         </div>
         <div>
           <dt className="font-semibold">Contato</dt>
-          <dd>{emp.contato_nome} — {emp.contato_email}</dd>
+          <dd>
+            {emp.contato_nome} —{' '}
+            <a href={`mailto:${emp.contato_email}`} className="text-blue-600 hover:underline">
+              {emp.contato_email}
+            </a>
+          </dd>
         </div>
         {emp.telefone && (
           <div>
@@ -49,8 +60,12 @@ export default async function EmpresaDetailsPage({
           <div>
             <dt className="font-semibold">Site</dt>
             <dd>
-              <a href={emp.site} target="_blank" rel="noopener noreferrer"
-                 className="text-blue-600 hover:underline">
+              <a
+                href={emp.site}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
                 {emp.site}
               </a>
             </dd>
@@ -59,7 +74,7 @@ export default async function EmpresaDetailsPage({
       </dl>
 
       <div className="pt-4">
-        <Link href={`/empresas/${emp.id}/edit`}>
+        <Link href={`/dashboard/empresas/${emp.id}/edit`}>
           <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
             Editar
           </button>

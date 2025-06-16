@@ -1,68 +1,85 @@
 'use client'
+
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { Avaliacao } from '@/types/avaliacao'
+
+interface FormState {
+  id: number
+  aluno_id: number
+  projeto_id: number
+  nota: number
+  feedback: string | null
+  avaliador_nome: string | null
+}
 
 export default function EditAvaliacaoPage() {
   const router = useRouter()
   const { avaliacaoId } = useParams()
-  const [form, setForm] = useState<Omit<Avaliacao, 'data_avaliacao'> | null>(null)
+  const [form, setForm] = useState<FormState | null>(null)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  // 1) Carrega a avaliação existente em snake_case
   useEffect(() => {
     if (!avaliacaoId) return
-    fetch(`/api/avaliacoes/${avaliacaoId}`)
+    fetch(`/api/avaliacoes/${avaliacaoId}`, { cache: 'no-store' })
       .then(res => {
         if (!res.ok) throw new Error('Não encontrada')
         return res.json()
       })
-      .then((data: Avaliacao) => {
-        // Aqui extraímos apenas o timestamp,
-        // mantendo 'id' e os demais campos em 'rest'
+      .then((data: FormState & { data_avaliacao: string }) => {
+        // descarta data_avaliacao
         const { data_avaliacao, ...rest } = data
         setForm(rest)
       })
       .catch(() => setError('Falha ao carregar avaliação.'))
+      .finally(() => setLoading(false))
   }, [avaliacaoId])
 
+  // 2) Manipula mudança de qualquer campo
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) {
     if (!form) return
-    setForm({ ...form, [e.target.name]: e.target.value } as any)
+    const { name, value } = e.target
+    setForm(prev => prev && ({
+      ...prev,
+      [name]:
+        name === 'aluno_id' || name === 'projeto_id' || name === 'nota'
+          ? Number(value)
+          : value,
+    }))
   }
 
+  // 3) Envia o PUT já em snake_case
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!avaliacaoId || !form) return
+    if (!form || !avaliacaoId) return
+
     setError('')
-    const payload = {
-      ...form,
-      aluno_id: Number(form.aluno_id),
-      projeto_id: Number(form.projeto_id),
-      nota: parseFloat(String(form.nota)),
-      feedback: form.feedback || null,
-      avaliador_nome: form.avaliador_nome || null,
-    }
+    const { id, ...payload } = form
+
     const res = await fetch(`/api/avaliacoes/${avaliacaoId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
+
     if (res.ok) {
-      router.push(`/avaliacoes/${avaliacaoId}`)
+      router.push(`/dashboard/avaliacoes/${avaliacaoId}`)
     } else {
-      const data = await res.json().catch(() => ({}))
-      setError(data.error || 'Erro ao atualizar avaliação.')
+      const json = await res.json().catch(() => ({}))
+      setError(json.error || 'Erro ao atualizar avaliação.')
     }
   }
 
-  if (error) return <p className="p-8 text-red-600">{error}</p>
-  if (!form) return <p className="p-8">Carregando...</p>
+  if (loading) return <p className="p-8">Carregando...</p>
+  if (error)   return <p className="p-8 text-red-600">{error}</p>
+  if (!form)   return null
 
   return (
     <div className="p-8 max-w-lg space-y-6">
-      <h1 className="text-3xl font-bold">Editar Avaliação</h1>
+      <h1 className="text-3xl font-bold">Editar Avaliação #{form.id}</h1>
 
       <form onSubmit={handleSubmit} className="grid gap-4">
         <label className="block">
@@ -70,7 +87,7 @@ export default function EditAvaliacaoPage() {
           <input
             name="aluno_id"
             type="number"
-            value={String(form.aluno_id)}
+            value={form.aluno_id}
             onChange={handleChange}
             required
             className="mt-1 block w-full border-gray-300 rounded"
@@ -82,7 +99,7 @@ export default function EditAvaliacaoPage() {
           <input
             name="projeto_id"
             type="number"
-            value={String(form.projeto_id)}
+            value={form.projeto_id}
             onChange={handleChange}
             required
             className="mt-1 block w-full border-gray-300 rounded"
@@ -95,7 +112,7 @@ export default function EditAvaliacaoPage() {
             name="nota"
             type="number"
             step="0.01"
-            value={String(form.nota)}
+            value={form.nota.toString()}
             onChange={handleChange}
             required
             className="mt-1 block w-full border-gray-300 rounded"
@@ -106,7 +123,7 @@ export default function EditAvaliacaoPage() {
           <span className="font-medium">Feedback</span>
           <textarea
             name="feedback"
-            value={form.feedback ?? ''}
+            value={form.feedback || ''}
             onChange={handleChange}
             className="mt-1 block w-full border-gray-300 rounded"
           />
@@ -117,7 +134,7 @@ export default function EditAvaliacaoPage() {
           <input
             name="avaliador_nome"
             type="text"
-            value={form.avaliador_nome ?? ''}
+            value={form.avaliador_nome || ''}
             onChange={handleChange}
             className="mt-1 block w-full border-gray-300 rounded"
           />

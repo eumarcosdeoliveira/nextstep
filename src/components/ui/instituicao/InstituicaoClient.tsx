@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { del, get } from '@/services/api'
+import { del } from '@/services/api'
 import { Instituicao } from '@/types/instituicao'
 import InstituicaoTable from './InstituicaoTable'
 

@@ -1,4 +1,3 @@
-// src/components/instituicao/InstituicaoTable.tsx
 'use client'
 
 import React from 'react'
@@ -12,6 +11,10 @@ interface Props {
 }
 
 export default function InstituicaoTable({ data, onEdit, onDelete }: Props) {
+  if (data.length === 0) {
+    return <p className="p-4 text-center">Nenhuma instituição cadastrada.</p>
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border-collapse">
@@ -30,14 +33,30 @@ export default function InstituicaoTable({ data, onEdit, onDelete }: Props) {
             <tr key={inst.id} className="border-t">
               <td className="px-4 py-2">{inst.id}</td>
               <td className="px-4 py-2">{inst.nome}</td>
-              <td className="px-4 py-2">{inst.sigla}</td>
+              <td className="px-4 py-2">{inst.sigla || '—'}</td>
               <td className="px-4 py-2">{inst.tipo}</td>
-              <td className="px-4 py-2">{inst.contato_nome}</td>
+              <td className="px-4 py-2">
+                {inst.contato_nome}{' '}
+                <a
+                  href={`mailto:${inst.contato_email}`}
+                  className="text-blue-600 hover:underline"
+                >
+                  ({inst.contato_email})
+                </a>
+              </td>
               <td className="px-4 py-2 text-right space-x-2">
-                <Button size="sm" variant="outline" onClick={() => onEdit(inst)}>
+                <Button
+                  
+                  variant="outline"
+                  onClick={() => onEdit(inst)}
+                >
                   Editar
                 </Button>
-                <Button size="sm" variant="destructive" onClick={() => onDelete(inst.id)}>
+                <Button
+                  
+                  variant="primary"
+                  onClick={() => onDelete(inst.id)}
+                >
                   Deletar
                 </Button>
               </td>

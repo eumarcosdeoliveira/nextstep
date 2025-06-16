@@ -1,10 +1,25 @@
+// src/app/instituicoes/page.tsx
 import Link from 'next/link'
-import { get } from '@/services/api'
-import { Instituicao } from '@/types/instituicao'
+import { prisma } from '@/lib/db'
 import InstituicoesClient from '@/components/ui/instituicao/InstituicaoClient'
+import { Instituicao as InstituicaoType } from '@/types/instituicao'
 
 export default async function InstituicoesPage() {
-  const insts = await get<Instituicao[]>('/api/instituicoes')
+  const raw = await prisma.instituicao_ensino.findMany({
+    orderBy: { nome: 'asc' },
+  })
+
+  const insts: InstituicaoType[] = raw.map((inst) => ({
+    id:            inst.id,
+    nome:          inst.nome,
+    sigla:         inst.sigla ?? '',
+    tipo:          inst.tipo as 'Pública' | 'Privada', // cast para a união correta
+    endereco:      inst.endereco ?? '',
+    contato_nome:  inst.contato_nome,
+    contato_email: inst.contato_email,
+    telefone:      inst.telefone ?? '',
+    site:          inst.site ?? '',
+  }))
 
   return (
     <div className="p-8 space-y-6">
@@ -18,7 +33,6 @@ export default async function InstituicoesPage() {
         </Link>
       </header>
 
-      {/* Renderiza o Client Wrapper */}
       <InstituicoesClient data={insts} />
     </div>
   )

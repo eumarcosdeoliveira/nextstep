@@ -43,15 +43,14 @@ export default function AvaliacaoTable({
               </td>
               <td className="px-4 py-2 text-right space-x-2">
                 <Button
-                  size="sm"
                   variant="outline"
                   onClick={() => onEdit(av)}
                 >
                   Editar
                 </Button>
                 <Button
-                  size="sm"
-                  variant="destructive"
+                  
+                  variant="primary"
                   onClick={() => onDelete(av.id)}
                 >
                   Deletar

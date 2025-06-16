@@ -61,7 +61,6 @@ export const authOptions: AuthOptions = {
           return null;
         }
 
-        // Retorna o usuário autenticado. NextAuth vai serializar isso para o JWT.
         return {
           id: String(user.id),
           name: user.name,
@@ -77,52 +76,48 @@ export const authOptions: AuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account: _account, profile: _profile }) { // 'profile' foi renomeado
       if (user) {
         token.id = String(user.id);
         token.role = user.role;
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }) { // 'Session' e 'JWT' são usados aqui
       if (session.user && token) {
         session.user.id = token.id;
         session.user.role = token.role;
       }
       return session;
     },
-    // Callback signIn para lidar com o redirecionamento OAuthAccountNotLinked E a vinculação manual
-    async signIn({ user, account, profile, email, credentials }) {
+    async signIn({ user, account, profile: _profile, email: _email, credentials }) { // 'profile' e 'email' foram renomeados
       console.log('--- signIn callback ---');
       console.log('  user (from login attempt):', user);
       console.log('  account (if OAuth):', account);
       console.log('  credentials (if Credentials):', credentials ? { email: credentials.email } : null);
 
-      if (account) { // Se for um login via provedor (OAuth)
+      if (account) {
         console.log('  Login attempt is via OAuth provider:', account.provider);
 
-        // Tentar encontrar um usuário existente pelo email
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email as string },
-          include: { Account: true } // Corrigido para 'Account' com 'A' maiúsculo
+          include: { Account: true }
         });
 
         console.log('  existingUser found by email (OAuth flow):', existingUser ? { id: existingUser.id, email: existingUser.email, accountsCount: existingUser.Account.length } : 'None');
 
         if (existingUser) {
           const hasLinkedAccount = existingUser.Account.some(
-            (acc: { provider: string; providerAccountId: string; userId: number }) => // Tipagem mais explícita
+            (acc: { provider: string; providerAccountId: string; userId: number }) =>
               acc.provider === account.provider && acc.providerAccountId === account.providerAccountId
           );
 
           if (!hasLinkedAccount) {
-            // Usuário existe com este e-mail, mas esta conta OAuth NÃO está vinculada
-            // IMPORTANTE: TENTAR VINCULAR AQUI SE O PRISMAADAPTER NÃO FEZ AUTOMATICAMENTE
             console.log('  User exists, but this OAuth account NOT linked. Attempting to link manually.');
             try {
               await prisma.account.create({
                 data: {
-                  userId: existingUser.id, // ID do usuário existente
+                  userId: existingUser.id,
                   type: account.type,
                   provider: account.provider,
                   providerAccountId: account.providerAccountId,
@@ -136,38 +131,29 @@ export const authOptions: AuthOptions = {
                 },
               });
               console.log('  Manual account linking successful!');
-              return true; // Permite o login após a vinculação manual
+              return true;
             } catch (error) {
               console.error('Error during manual account linking:', error);
-              // Se a vinculação manual falhar (ex: duplicate entry), redirecione para link-account
-              // Ou para a página de erro com uma mensagem mais específica
               return `/auth/link-account?email=${encodeURIComponent(user.email as string)}&error=linking_failed`;
             }
           } else {
-            // Usuário existe E a conta OAuth JÁ está vinculada. Permite login.
             console.log('  User exists AND OAuth account IS linked. Allowing login.');
             return true;
           }
         } else {
-          // Usuário com este e-mail NÃO existe no DB (primeiro login OAuth para este email)
-          // NextAuth.js vai criar um novo usuário e uma nova conta automaticamente via adaptador.
           console.log('  User with this email does NOT exist. Allowing new OAuth account creation.');
           return true;
         }
-      } else if (credentials) { // Se for login via credenciais
+      } else if (credentials) {
         console.log('  Login attempt is via Credentials.');
-        // Aqui, o 'user' já vem do authorize(). Se chegou aqui, as credenciais estão ok.
-        // O NextAuth.js fará o login padrão. Se houver uma sessão OAuth pendente,
-        // o adaptador deve lidar com a vinculação automática.
         console.log('  Credentials login. Allowing login.');
         return true;
       }
 
       console.log('  Unhandled signIn scenario. Denying login.');
-      return false; // Por segurança, nega cenários não tratados
+      return false;
     },
 
-    // Redirect callback
     async redirect({ url, baseUrl }) {
       console.log('--- redirect callback ---');
       console.log('  url:', url);
