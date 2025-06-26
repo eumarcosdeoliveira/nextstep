@@ -1,32 +1,88 @@
-import { get, post, put, del } from './api'
+// src/services/aluno.service.ts
+
 import { Aluno } from '@/types/aluno'
+import { AlunoFormData } from '@/components/ui/aluno/AlunoForm'
 
-// GET /api/alunos
-export function getAllAlunos(): Promise<Aluno[]> {
-  return get<Aluno[]>('/api/alunos')
+/**
+ * Busca todos os alunos
+ */
+export async function getAllAlunos(): Promise<Aluno[]> {
+  const res = await fetch('/api/alunos', { cache: 'no-store' })
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}))
+    throw new Error((errBody.error as string) || res.statusText)
+  }
+  return res.json()
 }
 
-// GET /api/alunos/:id
-export function getAluno(id: string): Promise<Aluno> {
-  return get<Aluno>(`/api/alunos/${id}`)
+/**
+ * Busca um aluno específico por ID
+ */
+export async function getAluno(id: string): Promise<Aluno> {
+  const res = await fetch(`/api/alunos/${id}`, { cache: 'no-store' })
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}))
+    throw new Error((errBody.error as string) || res.statusText)
+  }
+  return res.json()
 }
 
-// POST /api/alunos
-export function createAluno(
-  data: Omit<Aluno, 'id' | 'data_cadastro' | 'instituicao_id'>
-): Promise<Aluno> {
-  return post<Aluno>('/api/alunos', data)
+/**
+ * Cria um novo aluno
+ */
+export async function createAluno(data: AlunoFormData): Promise<Aluno> {
+  const payload = {
+    ...data,
+    instituicao_id: Number(data.instituicao_id),
+  }
+
+  const res = await fetch('/api/alunos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}))
+    throw new Error((errBody.error as string) || res.statusText)
+  }
+
+  return res.json()
 }
 
-// PUT /api/alunos/:id
-export function updateAluno(
-  id: string,
-  data: Omit<Aluno, 'id' | 'data_cadastro' | 'instituicao_id'>
-): Promise<Aluno> {
-  return put<Aluno>(`/api/alunos/${id}`, data)
+/**
+ * Atualiza um aluno existente
+ */
+export async function updateAluno(id: string, data: AlunoFormData): Promise<Aluno> {
+  const payload = {
+    ...data,
+    instituicao_id: Number(data.instituicao_id),
+  }
+
+  const res = await fetch(`/api/alunos/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}))
+    throw new Error((errBody.error as string) || res.statusText)
+  }
+
+  return res.json()
 }
 
-// DELETE /api/alunos/:id
-export function deleteAluno(id: string): Promise<void> {
-  return del<void>(`/api/alunos/${id}`)
+/**
+ * Deleta um aluno
+ */
+export async function deleteAluno(id: string): Promise<void> {
+  const res = await fetch(`/api/alunos/${id}`, {
+    method: 'DELETE',
+  })
+
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}))
+    throw new Error((errBody.error as string) || res.statusText)
+  }
 }

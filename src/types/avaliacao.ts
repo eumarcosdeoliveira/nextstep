@@ -1,29 +1,19 @@
 // src/types/avaliacao.ts
-
 export interface Avaliacao {
   id: number
+  aluno: { id: number; nome: string }
+  projeto: { id: number; titulo: string }
   nota: number
-  feedback: string
-  avaliador_nome: string
+  feedback: string | null
+  avaliador_nome: string | null
   data_avaliacao: string
-  // Relações incluídas pelo include no Prisma:
-  aluno: {
-    id: number
-    nome: string
-  }
-  projeto: {
-    id: number
-    titulo: string
-  }
 }
 
-// Se você quiser tipos auxiliares para criar/atualizar:
-export type AvaliacaoCreateInput = {
+// Reexportar também o tipo usado no form:
+export interface AvaliacaoFormValues {
   alunoId: number
   projetoId: number
   nota: number
   feedback: string
-  avaliador_nome: string
+  avaliadorNome: string
 }
-
-export type AvaliacaoUpdateInput = Partial<AvaliacaoCreateInput>

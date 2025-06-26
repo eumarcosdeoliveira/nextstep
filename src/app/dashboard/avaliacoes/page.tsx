@@ -1,12 +1,12 @@
 // src/app/avaliacoes/page.tsx
-
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
 import AvaliacoesClient from '@/components/ui/avaliacao/AvaliacoesClient'
 import { Avaliacao as AvaliacaoType } from '@/types/avaliacao'
+import { Button } from '@/components/ui/Button'
 
 export default async function AvaliacoesPage() {
-  // Busca direta no banco em um Server Component
+  // Server‐side fetch
   const raw = await prisma.avaliacao.findMany({
     include: {
       aluno:   { select: { id: true, nome: true } },
@@ -15,8 +15,7 @@ export default async function AvaliacoesPage() {
     orderBy: { data_avaliacao: 'desc' },
   })
 
-  // Converte Decimal → number e elimina nulls em feedback/avaliador_nome
-  // Converte Date → string (ISO) se seu type Avaliacao.data_avaliacao for string
+  // Map para tipo cliente, convertendo Decimal → number e Date → ISO string
   const avaliacoes: AvaliacaoType[] = raw.map((av) => ({
     id:             av.id,
     aluno_id:       av.aluno_id,
@@ -32,15 +31,17 @@ export default async function AvaliacoesPage() {
   return (
     <div className="p-8 space-y-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Avaliações</h1>
-        <Link href="/avaliacoes/create">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+        <h1 className="text-3xl font-bold text-gray-900">Avaliações</h1>
+        <Link href="/dashboard/avaliacoes/create">
+          <Button variant="primary">
             + Nova Avaliação
-          </button>
+          </Button>
         </Link>
       </header>
 
-      <AvaliacoesClient avaliacoes={avaliacoes} />
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <AvaliacoesClient avaliacoes={avaliacoes} />
+      </div>
     </div>
   )
 }

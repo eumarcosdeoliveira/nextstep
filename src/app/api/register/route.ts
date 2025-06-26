@@ -2,69 +2,62 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import bcrypt from 'bcrypt'
+import { Prisma } from '@prisma/client'
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password, confirmPassword, phone, document, role } = await request.json()
+    const {
+      name,
+      email,
+      password,
+      confirmPassword,
+      phone,
+      role_id,
+      empresa_id,
+      instituicao_id,
+    } = (await request.json()) as Record<string, any>
 
-    console.log('Dados recebidos no backend /api/register:', { name, email, password, confirmPassword, phone, document, role }); // ADICIONE ESTA LINHA
+    const parsedRoleId =
+      typeof role_id === 'string' ? parseInt(role_id, 10) : role_id
 
-    // 1) Validação de campos obrigatórios
-    if (!name || !email || !password || !confirmPassword || !role) {
+    // — Validações omitidas —
+
+    const hashed = await bcrypt.hash(password, 10)
+
+    const data: any = {
+      name,
+      email,
+      password: hashed,
+      phone,
+      roleRelation: { connect: { id: parsedRoleId } },
+    }
+
+    if (parsedRoleId === 1) {
+      data.empresa = { connect: { id: Number(empresa_id) } }
+    } else if (parsedRoleId === 2) {
+      data.instituicao_ensino = { connect: { id: Number(instituicao_id) } }
+    }
+
+    const user = await prisma.user.create({ data })
+
+    return NextResponse.json(
+      { id: user.id, name: user.name, email: user.email, roleId: parsedRoleId },
+      { status: 201 }
+    )
+  } catch (err: any) {
+    console.error('🔥 [register] Erro interno:', err)
+
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      Array.isArray((err.meta as any)?.target) &&
+      (err.meta as any).target.includes('email')
+    ) {
       return NextResponse.json(
-        { error: 'Nome, e-mail, senhas e tipo de perfil são obrigatórios.' },
-        { status: 400 }
-      )
-    }
-
-    // Valide phone e document se forem obrigatórios (ajuste conforme a necessidade)
-    if (!phone) {
-        return NextResponse.json({ error: 'Telefone é obrigatório.' }, { status: 400 });
-    }
-    if (!document) {
-        return NextResponse.json({ error: 'Documento (CNPJ/CPF) é obrigatório.' }, { status: 400 });
-    }
-
-    // 2) Verificar se as senhas coincidem
-    if (password !== confirmPassword) {
-      return NextResponse.json(
-        { error: 'As senhas não coincidem.' },
-        { status: 400 }
-      )
-    }
-
-    // 3) Checar se já existe usuário com este e-mail
-    const exists = await prisma.user.findUnique({ where: { email } })
-    if (exists) {
-      return NextResponse.json(
-        { error: 'Já existe um usuário com este e-mail.' },
+        { error: 'Já existe um usuário cadastrado com este e-mail.' },
         { status: 409 }
       )
     }
 
-    // 4) Hash da senha
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    // 5) Criar usuário no banco (inclua phone, document e role)
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        phone,
-        document,
-        role, // Salva o role do usuário
-        // emailVerified, image e createdAt são preenchidos pelos defaults do schema
-      },
-    })
-
-    // 6) Responder sem retornar a senha
-    return NextResponse.json(
-      { id: user.id, email: user.email, name: user.name, role: user.role }, // Retorna o role
-      { status: 201 }
-    )
-  } catch (err) {
-    console.error('Erro em /api/register:', err)
     return NextResponse.json(
       { error: 'Erro interno ao registrar usuário.' },
       { status: 500 }

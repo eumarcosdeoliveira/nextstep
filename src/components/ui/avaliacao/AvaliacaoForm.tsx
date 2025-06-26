@@ -1,15 +1,15 @@
 // src/components/ui/avaliacao/AvaliacaoForm.tsx
 'use client'
+
 import React, { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
 import { Select } from '@/components/ui/Select'
+import { Button } from '@/components/ui/Button'
 import { getAllAlunos } from '@/services/aluno.service'
 import { getAllProjetos } from '@/services/projeto.service'
 import type { Aluno } from '@/types/aluno'
 
-// Interface mínima para projetos (apenas o necessário para o dropdown)
 interface ProjetoMinimal {
   id: number
   titulo: string
@@ -26,46 +26,54 @@ export interface AvaliacaoFormValues {
 interface Props {
   initialValues?: Partial<AvaliacaoFormValues>
   onSave(values: AvaliacaoFormValues): void
-  onCancel(): void
+  submitLabel?: string
 }
 
 export default function AvaliacaoForm({
   initialValues = {},
   onSave,
-  onCancel,
+  submitLabel = 'Salvar',
 }: Props) {
   const [alunos, setAlunos] = useState<Aluno[]>([])
   const [projetos, setProjetos] = useState<ProjetoMinimal[]>([])
-  const [form, setForm] = useState<AvaliacaoFormValues>({
-    alunoId: initialValues.alunoId ?? 0,
-    projetoId: initialValues.projetoId ?? 0,
-    nota: initialValues.nota ?? 0,
-    feedback: initialValues.feedback ?? '',
+  const [form, setForm] = useState<{
+    alunoId: number
+    projetoId: number
+    nota: string
+    feedback: string
+    avaliadorNome: string
+  }>({
+    alunoId:       initialValues.alunoId ?? 0,
+    projetoId:     initialValues.projetoId ?? 0,
+    nota:          initialValues.nota != null ? String(initialValues.nota) : '',
+    feedback:      initialValues.feedback ?? '',
     avaliadorNome: initialValues.avaliadorNome ?? '',
   })
 
   useEffect(() => {
     getAllAlunos().then(setAlunos)
-    getAllProjetos().then((projetoOptions) => {
-      // Transformar ProjetoOption[] em ProjetoMinimal[]
-      const projetosFormatados = projetoOptions.map(projeto => ({
-        id: projeto.id,
-        titulo: (projeto as any).nome || (projeto as any).title || (projeto as any).label || `Projeto ${projeto.id}`, // Ajuste conforme a propriedade correta
-      }))
-      setProjetos(projetosFormatados)
-    })
+    getAllProjetos().then((opts: any[]) =>
+      setProjetos(
+        opts.map(p => ({
+          id: p.id,
+          titulo:
+            (p as any).nome ||
+            (p as any).title ||
+            (p as any).label ||
+            `Projeto ${p.id}`,
+        })),
+      )
+    )
   }, [])
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
     setForm(prev => ({
       ...prev,
       [name]:
-        name === 'nota' || name === 'alunoId' || name === 'projetoId'
+        name === 'alunoId' || name === 'projetoId'
           ? Number(value)
           : value,
     }))
@@ -73,89 +81,105 @@ export default function AvaliacaoForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSave(form)
+    onSave({
+      alunoId:       form.alunoId,
+      projetoId:     form.projetoId,
+      nota:          Number(form.nota),
+      feedback:      form.feedback,
+      avaliadorNome: form.avaliadorNome,
+    })
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label className="block mb-1 font-medium">Aluno</label>
+        <label htmlFor="alunoId" className="block mb-1 font-medium">
+          Aluno *
+        </label>
         <Select
           id="alunoId"
           name="alunoId"
-          value={form.alunoId}
+          value={String(form.alunoId)}
           onChange={handleChange}
-          className="w-full"
           required
+          className="w-full"
         >
-          <option value={0} disabled>
-            Selecione um aluno
-          </option>
+          <option value="0" disabled>Selecione um aluno</option>
           {alunos.map(a => (
-            <option key={a.id} value={a.id}>
-              {a.nome}
-            </option>
+            <option key={a.id} value={a.id}>{a.nome}</option>
           ))}
         </Select>
       </div>
 
       <div>
-        <label className="block mb-1 font-medium">Projeto</label>
+        <label htmlFor="projetoId" className="block mb-1 font-medium">
+          Projeto *
+        </label>
         <Select
           id="projetoId"
           name="projetoId"
-          value={form.projetoId}
+          value={String(form.projetoId)}
           onChange={handleChange}
-          className="w-full"
           required
+          className="w-full"
         >
-          <option value={0} disabled>
-            Selecione um projeto
-          </option>
+          <option value="0" disabled>Selecione um projeto</option>
           {projetos.map(p => (
-            <option key={p.id} value={p.id}>
-              {p.titulo}
-            </option>
+            <option key={p.id} value={p.id}>{p.titulo}</option>
           ))}
         </Select>
       </div>
 
       <div>
-        <label className="block mb-1 font-medium">Nota</label>
+        <label htmlFor="nota" className="block mb-1 font-medium">
+          Nota (0–10) *
+        </label>
         <Input
-          type="number"
+          id="nota"
           name="nota"
-          step="0.01"
+          type="number"
+          min={0}
+          max={10}
+          step={1}
+          placeholder="Digite de 0 a 10"
           value={form.nota}
           onChange={handleChange}
+          required
         />
       </div>
 
       <div>
-        <label className="block mb-1 font-medium">Feedback</label>
+        <label htmlFor="feedback" className="block mb-1 font-medium">
+          Feedback
+        </label>
         <Textarea
+          id="feedback"
           name="feedback"
           rows={4}
           value={form.feedback}
           onChange={handleChange}
+          className="w-full"
         />
       </div>
 
       <div>
-        <label className="block mb-1 font-medium">Avaliador</label>
+        <label htmlFor="avaliadorNome" className="block mb-1 font-medium">
+          Avaliador
+        </label>
         <Input
-          type="text"
+          id="avaliadorNome"
           name="avaliadorNome"
+          placeholder="Nome do avaliador"
           value={form.avaliadorNome}
           onChange={handleChange}
+          className="w-full"
         />
       </div>
 
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={onCancel}>
-          Cancelar
+      <div className="pt-4">
+        <Button type="submit" fullWidth>
+          {submitLabel}
         </Button>
-        <Button type="submit">Salvar</Button>
       </div>
     </form>
   )

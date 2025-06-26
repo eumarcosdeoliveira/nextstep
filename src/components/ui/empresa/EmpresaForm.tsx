@@ -1,127 +1,148 @@
-// src/components/empresa/EmpresaForm.tsx
+// src/components/ui/empresa/EmpresaForm.tsx
 'use client'
-import { useState } from 'react'
-import { Empresa } from '@/types/empresa'
 
-export type EmpresaFormData = Omit<Empresa, 'id'>
+import React, { useState } from 'react'
+import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/Button'
 
-interface EmpresaFormProps {
-  initialData?: Partial<EmpresaFormData>
-  onSubmit: (data: EmpresaFormData) => void
+export interface EmpresaFormValues {
+  nome: string
+  cnpj: string
+  setor: string
+  contato_nome: string
+  contato_email: string
+  telefone?: string
+  site?: string
+}
+
+interface Props {
+  initialValues?: Partial<EmpresaFormValues>
+  onSave(values: EmpresaFormValues): void
   submitLabel?: string
 }
 
 export default function EmpresaForm({
-  initialData = {},
-  onSubmit,
+  initialValues = {},
+  onSave,
   submitLabel = 'Salvar',
-}: EmpresaFormProps) {
-  const [form, setForm] = useState<EmpresaFormData>({
-    nome: initialData.nome || '',
-    cnpj: initialData.cnpj || '',
-    setor: initialData.setor || '',
-    contato_nome: initialData.contato_nome || '',
-    contato_email: initialData.contato_email || '',
-    telefone: initialData.telefone || '',
-    site: initialData.site || '',
+}: Props) {
+  const [form, setForm] = useState<EmpresaFormValues>({
+    nome:           initialValues.nome           ?? '',
+    cnpj:           initialValues.cnpj           ?? '',
+    setor:          initialValues.setor          ?? '',
+    contato_nome:   initialValues.contato_nome   ?? '',
+    contato_email:  initialValues.contato_email  ?? '',
+    telefone:       initialValues.telefone       ?? '',
+    site:           initialValues.site           ?? '',
   })
 
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement>
-  ) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setForm((f) => ({ ...f, [name]: value }))
+    setForm(prev => ({ ...prev, [name]: value }))
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit(form)
+    onSave(form)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-4">
-      <label className="block">
-        <span className="font-medium">Nome *</span>
-        <input
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div>
+        <label htmlFor="nome" className="block mb-1 font-medium">
+          Nome *
+        </label>
+        <Input
+          id="nome"
           name="nome"
           value={form.nome}
           onChange={handleChange}
           required
-          className="mt-1 block w-full border-gray-300 rounded"
         />
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="font-medium">CNPJ *</span>
-        <input
+      <div>
+        <label htmlFor="cnpj" className="block mb-1 font-medium">
+          CNPJ *
+        </label>
+        <Input
+          id="cnpj"
           name="cnpj"
           value={form.cnpj}
           onChange={handleChange}
           required
-          className="mt-1 block w-full border-gray-300 rounded"
         />
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="font-medium">Setor *</span>
-        <input
+      <div>
+        <label htmlFor="setor" className="block mb-1 font-medium">
+          Setor *
+        </label>
+        <Input
+          id="setor"
           name="setor"
           value={form.setor}
           onChange={handleChange}
           required
-          className="mt-1 block w-full border-gray-300 rounded"
         />
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="font-medium">Contato Nome *</span>
-        <input
+      <div>
+        <label htmlFor="contato_nome" className="block mb-1 font-medium">
+          Contato *
+        </label>
+        <Input
+          id="contato_nome"
           name="contato_nome"
           value={form.contato_nome}
           onChange={handleChange}
           required
-          className="mt-1 block w-full border-gray-300 rounded"
         />
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="font-medium">Contato Email *</span>
-        <input
+      <div>
+        <label htmlFor="contato_email" className="block mb-1 font-medium">
+          E-mail *
+        </label>
+        <Input
+          id="contato_email"
           name="contato_email"
           type="email"
           value={form.contato_email}
           onChange={handleChange}
           required
-          className="mt-1 block w-full border-gray-300 rounded"
         />
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="font-medium">Telefone</span>
-        <input
+      <div>
+        <label htmlFor="telefone" className="block mb-1 font-medium">
+          Telefone
+        </label>
+        <Input
+          id="telefone"
           name="telefone"
           value={form.telefone}
           onChange={handleChange}
-          className="mt-1 block w-full border-gray-300 rounded"
         />
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="font-medium">Site</span>
-        <input
+      <div>
+        <label htmlFor="site" className="block mb-1 font-medium">
+          Site
+        </label>
+        <Input
+          id="site"
           name="site"
           value={form.site}
           onChange={handleChange}
-          className="mt-1 block w-full border-gray-300 rounded"
         />
-      </label>
+      </div>
 
-      <button
-        type="submit"
-        className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-      >
-        {submitLabel}
-      </button>
+      <div className="pt-4">
+        <Button type="submit" fullWidth>
+          {submitLabel}
+        </Button>
+      </div>
     </form>
   )
 }

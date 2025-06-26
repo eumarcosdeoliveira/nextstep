@@ -1,17 +1,18 @@
-export type ProjetoOption = {
-  id: number
-  label: string
+import axios from 'axios'
+import type { ProjetoFormValues } from '@/components/ui/projeto/ProjetoForm'
+import type { Projeto } from '@/types/projeto'
+
+const BASE = '/api/projetos'
+
+export async function createProjeto(payload: ProjetoFormValues): Promise<Projeto> {
+  const { data } = await axios.post(BASE, payload)
+  return data
 }
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL
-
-export async function getAllProjetos(): Promise<ProjetoOption[]> {
-  const res = await fetch(`${baseURL}/api/projetos`, { cache: 'no-store' })
-
-  if (!res.ok) {
-    throw new Error(`Erro ao buscar projetos: ${res.statusText}`)
-  }
-
-  const data: { id: number; titulo: string }[] = await res.json()
-  return data.map(p => ({ id: p.id, label: p.titulo }))
+/**
+ * Busca todos os projetos
+ */
+export async function getAllProjetos(): Promise<Projeto[]> {
+  const { data } = await axios.get(BASE) // GET /api/projetos
+  return data
 }

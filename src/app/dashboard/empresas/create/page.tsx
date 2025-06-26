@@ -1,75 +1,70 @@
 'use client'
-import { useState } from 'react'
+
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
-export default function CreateEmpresaPage() {
+import ProjetoForm, { ProjetoFormValues } from '@/components/ui/projeto/ProjetoForm'
+import { createProjeto } from '@/services/projeto.service'
+import { Button } from '@/components/ui/Button'
+import { Toast } from '@/components/ui/Toast'
+
+export default function CreateProjetoPage() {
   const router = useRouter()
-  const [form, setForm] = useState({
-    nome: '',
-    cnpj: '',
-    setor: '',
-    contato_nome: '',
-    contato_email: '',
-    telefone: '',
-    site: '',
-  })
-  const [error, setError] = useState('')
+  const [loadingSave, setLoadingSave] = useState(false)
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm(f => ({ ...f, [e.target.name]: e.target.value }))
+  const initialData: Partial<ProjetoFormValues> = {
+    titulo:            '',
+    descricao:         '',
+    nivel_dificuldade: 'Básico',
+    empresaId:         0,
+    areaId:            0,
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    const res = await fetch('/api/empresas', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-    if (res.ok) {
-      router.push('/empresas')
-    } else {
-      const data = await res.json().catch(() => ({}))
-      setError(data.error || 'Erro ao criar empresa.')
+  const handleSave = async (data: ProjetoFormValues) => {
+    setToast(null)
+    setLoadingSave(true)
+    try {
+      await createProjeto(data)
+      setToast({ type: 'success', message: 'Projeto criado com sucesso!' })
+      setTimeout(() => router.push('/projetos'), 1000)
+    } catch (err: unknown) {
+      console.error('Erro ao salvar projeto:', err)
+      const msg = err instanceof Error ? err.message : 'Erro ao salvar projeto.'
+      setToast({ type: 'error', message: msg })
+    } finally {
+      setLoadingSave(false)
     }
   }
 
   return (
-    <div className="p-8 max-w-lg space-y-6">
-      <h1 className="text-3xl font-bold">Nova Empresa</h1>
-      {error && <p className="text-red-600">{error}</p>}
+    <div className="flex flex-col h-full">
+      <header className="flex items-center justify-between px-6 py-4">
+        <h1 className="text-2xl font-bold">Novo Projeto</h1>
+        <Link href="/projetos">
+          <Button variant="outline">Cancelar</Button>
+        </Link>
+      </header>
 
-      <form onSubmit={handleSubmit} className="grid gap-4">
-        {[
-          { name: 'nome', label: 'Nome *', type: 'text' },
-          { name: 'cnpj', label: 'CNPJ *', type: 'text' },
-          { name: 'setor', label: 'Setor *', type: 'text' },
-          { name: 'contato_nome', label: 'Contato *', type: 'text' },
-          { name: 'contato_email', label: 'E-mail *', type: 'email' },
-          { name: 'telefone', label: 'Telefone', type: 'text' },
-          { name: 'site', label: 'Site', type: 'text' },
-        ].map(({ name, label, type }) => (
-          <label key={name} className="block">
-            <span className="font-medium">{label}</span>
-            <input
-              name={name}
-              type={type}
-              value={form[name as keyof typeof form]}
-              onChange={handleChange}
-              className="mt-1 block w-full border-gray-300 rounded"
-              {...(label.endsWith('*') ? { required: true } : {})}
+      <main className="flex-1 overflow-auto p-6 lg:p-8">
+        <section className="max-w-3xl mx-auto p-8 md:p-10">
+          {toast && (
+            <Toast
+              type={toast.type}
+              message={toast.message}
+              position="bottom-right"
+              onClose={() => setToast(null)}
             />
-          </label>
-        ))}
+          )}
 
-        <button
-          type="submit"
-          className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-        >
-          Salvar
-        </button>
-      </form>
+          <ProjetoForm
+            initialValues={initialData}
+            onSave={handleSave}
+            submitLabel={loadingSave ? 'Salvando…' : 'Salvar Projeto'}
+          />
+        </section>
+      </main>
     </div>
   )
 }

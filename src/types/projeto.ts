@@ -1,24 +1,44 @@
-// src/types/projeto.ts
-
-export interface Projeto {
-  /** Identificador único */
-  id: string
-
-  /** Título curto do desafio */
+export type Modulo = {
+  id: number
+  projeto_id: number
   titulo: string
-
-  /** Descrição detalhada (opcional) */
-  descricao?: string
-
-  /** Nível de dificuldade */
-  nivel_dificuldade: 'Básico' | 'Intermediário' | 'Avançado'
-
-  /** ID da empresa que criou o projeto */
-  empresa_id: string
-
-  /** ID da instituição vinculada ao projeto */
-  instituicao_id: string
-
-  /** Timestamp ISO de criação */
-  data_criacao: string
+  descricao: string
+  ordem: number
+  duracao_estim: string
 }
+
+export type InstituicaoVinculada = {
+  id: number
+  nome: string
+  data_inicio: string
+  progresso: number
+}
+
+export type Projeto = {
+  id: string
+  titulo: string
+  descricao: string
+  nivel_dificuldade: 'Básico' | 'Intermediário' | 'Avançado'
+  data_criacao: string
+  empresa_id: string
+  empresa_nome: string
+  area_nome: string
+  modulos: Modulo[]
+  instituicoes: InstituicaoVinculada[]
+}
+
+export type ProjetoRecebido = {
+  id: number
+  data_inicio: string
+  progresso: number
+  projeto: {
+    titulo: string
+    empresa: { nome: string }
+    modulo: {
+      id: number
+      titulo: string
+      ordem: number
+    }[]
+  }
+}
+

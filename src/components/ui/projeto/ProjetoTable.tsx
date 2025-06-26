@@ -16,7 +16,7 @@ export default function ProjetoTable({ projetos }: ProjetoTableProps) {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Título</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dificuldade</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Empresa ID</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Instituição ID</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Área ID</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Criado em</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
           </tr>
@@ -27,8 +27,12 @@ export default function ProjetoTable({ projetos }: ProjetoTableProps) {
               <td className="px-6 py-4 whitespace-nowrap">{proj.titulo}</td>
               <td className="px-6 py-4 whitespace-nowrap">{proj.nivel_dificuldade}</td>
               <td className="px-6 py-4 whitespace-nowrap">{proj.empresa_id}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{proj.instituicao_id}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{new Date(proj.data_criacao).toLocaleDateString()}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{(proj as any).area_id || 'N/A'}</td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {proj.data_criacao ? new Date(proj.data_criacao).toLocaleDateString() : 
+                 (proj as any).createdAt ? new Date((proj as any).createdAt).toLocaleDateString() :
+                 'N/A'}
+              </td>
               <td className="px-6 py-4 whitespace-nowrap space-x-2">
                 <Link href={`/projetos/${proj.id}/edit`}>
                   <button className="text-blue-600 hover:text-blue-800">Editar</button>

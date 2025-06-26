@@ -16,10 +16,13 @@ model aluno {
   nivel_instrucao    String             @db.VarChar(50)
   instituicao_id     Int
   data_cadastro      DateTime           @default(now()) @db.Timestamp(0)
+  turma_id           Int?
   instituicao_ensino instituicao_ensino @relation(fields: [instituicao_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_aluno_instituicao")
+  turma              turma?             @relation(fields: [turma_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_aluno_turma")
   avaliacao          avaliacao[]
 
   @@index([instituicao_id], map: "idx_aluno_instituicao")
+  @@index([turma_id], map: "idx_aluno_turma")
 }
 
 model avaliacao {
@@ -46,37 +49,43 @@ model empresa {
   contato_email String    @db.VarChar(255)
   telefone      String?   @db.VarChar(20)
   site          String?   @db.VarChar(255)
+  User          User[]
   projeto       projeto[]
 }
 
 model instituicao_ensino {
-  id            Int       @id @default(autoincrement())
-  nome          String    @db.VarChar(255)
-  sigla         String?   @db.VarChar(50)
-  tipo          String    @db.VarChar(50)
-  endereco      String?   @db.VarChar(500)
-  contato_nome  String    @db.VarChar(255)
-  contato_email String    @db.VarChar(255)
-  telefone      String?   @db.VarChar(20)
-  site          String?   @db.VarChar(255)
+  id            Int           @id @default(autoincrement())
+  nome          String        @db.VarChar(255)
+  sigla         String?       @db.VarChar(50)
+  tipo          String        @db.VarChar(50)
+  endereco      String?       @db.VarChar(500)
+  contato_nome  String        @db.VarChar(255)
+  contato_email String        @db.VarChar(255)
+  telefone      String?       @db.VarChar(20)
+  site          String?       @db.VarChar(255)
+  User          User[]
   aluno         aluno[]
-  projeto       projeto[]
+  projetos_ie   projetos_ie[]
+  turma         turma[]
 }
 
 model projeto {
-  id                 Int                @id @default(autoincrement())
-  titulo             String             @db.VarChar(255)
-  descricao          String?            @db.Text
-  nivel_dificuldade  String             @db.VarChar(50)
-  empresa_id         Int
-  instituicao_id     Int
-  data_criacao       DateTime           @default(now()) @db.Timestamp(0)
-  avaliacao          avaliacao[]
-  empresa            empresa            @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_projeto_empresa")
-  instituicao_ensino instituicao_ensino @relation(fields: [instituicao_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_projeto_instituicao")
+  id                Int           @id @default(autoincrement())
+  titulo            String        @db.VarChar(255)
+  descricao         String?       @db.Text
+  nivel_dificuldade String        @db.VarChar(50)
+  empresa_id        Int
+  data_criacao      DateTime      @default(now()) @db.Timestamp(0)
+  qtd_modulos       Int           @default(0)
+  area_id           Int
+  avaliacao         avaliacao[]
+  modulo            modulo[]
+  area              area          @relation(fields: [area_id], references: [id], onUpdate: Restrict, map: "fk_projeto_area")
+  empresa           empresa       @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_projeto_empresa")
+  projetos_ie       projetos_ie[]
 
   @@index([empresa_id], map: "idx_projeto_empresa")
-  @@index([instituicao_id], map: "idx_projeto_instituicao")
+  @@index([area_id], map: "idx_projeto_area")
 }
 
 model Account {
@@ -109,18 +118,27 @@ model Session {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  name          String?   @db.VarChar(255)
-  email         String    @unique(map: "User_email_unique") @db.VarChar(255)
-  password      String?   @db.VarChar(255)
-  role          String    @default("user")
-  emailVerified DateTime? @db.DateTime(0)
-  image         String?   @db.VarChar(255)
-  createdAt     DateTime  @default(now()) @db.DateTime(0)
-  phone         String?   @db.VarChar(20)
-  document      String?   @db.VarChar(18)
-  Account       Account[]
-  Session       Session[]
+  id                 Int                 @id @default(autoincrement())
+  name               String?             @db.VarChar(255)
+  email              String              @unique(map: "User_email_unique") @db.VarChar(255)
+  password           String?             @db.VarChar(255)
+  emailVerified      DateTime?           @db.DateTime(0)
+  image              String?             @db.VarChar(255)
+  createdAt          DateTime            @default(now()) @db.DateTime(0)
+  phone              String?             @db.VarChar(20)
+  document           String?             @db.VarChar(18)
+  role_id            Int?
+  empresa_id         Int?
+  instituicao_id     Int?
+  Account            Account[]
+  Session            Session[]
+  empresa            empresa?            @relation(fields: [empresa_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_user_empresa")
+  instituicao_ensino instituicao_ensino? @relation(fields: [instituicao_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_user_instituicao")
+  roleRelation       role?               @relation(fields: [role_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_user_role")
+
+  @@index([empresa_id], map: "idx_user_empresa")
+  @@index([instituicao_id], map: "idx_user_instituicao")
+  @@index([role_id], map: "idx_user_role")
 }
 
 model VerificationToken {
@@ -129,4 +147,60 @@ model VerificationToken {
   expires    DateTime @db.DateTime(0)
 
   @@id([identifier, token])
+}
+
+model area {
+  id                Int       @id @default(autoincrement())
+  nome              String    @db.VarChar(100)
+  nivel_dificuldade String    @db.VarChar(50)
+  projeto           projeto[]
+  turma             turma[]
+}
+
+model modulo {
+  id            Int     @id @default(autoincrement())
+  projeto_id    Int
+  titulo        String  @db.VarChar(255)
+  descricao     String? @db.Text
+  ordem         Int
+  duracao_estim String? @db.VarChar(20)
+  projeto       projeto @relation(fields: [projeto_id], references: [id], onUpdate: Restrict, map: "fk_mod_projeto")
+
+  @@index([projeto_id], map: "idx_mod_projeto")
+}
+
+model projetos_ie {
+  id                 Int                @id @default(autoincrement())
+  projeto_id         Int
+  instituicao_id     Int
+  turma_id           Int
+  progresso          Decimal?           @default(0.00) @db.Decimal(5, 2)
+  data_inicio        DateTime?          @db.Date
+  instituicao_ensino instituicao_ensino @relation(fields: [instituicao_id], references: [id], onUpdate: Restrict, map: "fk_pie_inst")
+  projeto            projeto            @relation(fields: [projeto_id], references: [id], onUpdate: Restrict, map: "fk_pie_projeto")
+  turma              turma              @relation(fields: [turma_id], references: [id], onUpdate: Restrict, map: "fk_pie_turma")
+
+  @@index([instituicao_id], map: "idx_pie_instituicao")
+  @@index([projeto_id], map: "idx_pie_projeto")
+  @@index([turma_id], map: "idx_pie_turma")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model role {
+  id   Int    @id @default(autoincrement())
+  nome String @db.VarChar(50)
+  User User[]
+}
+
+model turma {
+  id                 Int                @id @default(autoincrement())
+  area_id            Int
+  instituicao_id     Int
+  aluno              aluno[]
+  projetos_ie        projetos_ie[]
+  area               area               @relation(fields: [area_id], references: [id], onUpdate: Restrict, map: "fk_turma_area")
+  instituicao_ensino instituicao_ensino @relation(fields: [instituicao_id], references: [id], onUpdate: Restrict, map: "fk_turma_inst")
+
+  @@index([area_id], map: "idx_turma_area")
+  @@index([instituicao_id], map: "idx_turma_instituicao")
 }

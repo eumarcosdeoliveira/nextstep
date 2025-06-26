@@ -5,8 +5,7 @@ import Link from 'next/link'
 
 export default function RegisterInstituicaoPage() {
   const placeholderGradientClasses =
-    'bg-gradient-to-r from-purple-600 to-pink-400 bg-clip-text text-transparent' // Gradiente de cor diferente
-
+    'bg-gradient-to-r from-blue-600 to-green-400 bg-clip-text text-transparent' // Gradiente de cor diferente
   return (
     <div className="flex h-screen bg-white font-sans">
       <div className="flex flex-1 h-screen px-16 space-x-12">

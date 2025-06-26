@@ -3,8 +3,8 @@ import { prisma } from '@/lib/db'
 
 export async function POST(request: Request) {
   const { nome, email, matricula, nivel_instrucao, instituicao_id } = await request.json()
-
   const instId = Number(instituicao_id)
+
   if (Number.isNaN(instId) || instId < 1) {
     return NextResponse.json(
       { error: 'ID da instituição inválido. Deve ser um número válido.' },
@@ -34,6 +34,7 @@ export async function GET() {
     include: { instituicao_ensino: { select: { nome: true } } },
     orderBy: { nome: 'asc' },
   })
+
   const result = alunos.map(a => ({
     id: a.id,
     nome: a.nome,
@@ -44,5 +45,6 @@ export async function GET() {
     data_cadastro: a.data_cadastro.toISOString(),
     instituicao_nome: a.instituicao_ensino.nome,
   }))
+
   return NextResponse.json(result)
 }

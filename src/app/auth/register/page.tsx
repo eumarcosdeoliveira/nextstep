@@ -46,18 +46,17 @@ export default function RegisterPage() { // Renomeado de ChooseRolePage para Reg
         <div className="flex w-2/4 items-center justify-center">
           <div className="w-full max-w-md space-y-8 p-8 text-center"> {/* Adicionado bg e shadow para destaque */}
             <div className="space-y-6">
-              <button
-                onClick={() => router.push('/auth/register/empresa')}
+               <button
+                onClick={() => router.push('/auth/register/instituicao')}
                 className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-green-400 text-white text-lg font-medium shadow-xl hover:opacity-95 transition-opacity"
               >
-                Eu sou uma Empresa
+                Eu sou uma Instituição de Ensino
               </button>
-
               <button
-                onClick={() => router.push('/auth/register/instituicao')}
+                onClick={() => router.push('/auth/register/empresa')}
                 className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-400 text-white text-lg font-medium shadow-xl hover:opacity-95 transition-opacity"
               >
-                Eu sou uma Instituição de Ensino
+                Eu sou uma Empresa
               </button>
             </div>
           </div>

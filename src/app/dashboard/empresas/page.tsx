@@ -35,7 +35,7 @@ export default async function EmpresasPage() {
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-semibold">Empresas</h1>
         <Link
-          href="/empresas/create"
+          href="/dashboard/empresas/create"
           className="inline-block bg-gradient-to-r from-blue-600 to-green-400 text-white px-4 py-2 rounded-lg shadow hover:opacity-90 transition-opacity"
         >
           + Nova Empresa

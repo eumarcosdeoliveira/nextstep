@@ -1,14 +1,26 @@
-// src/app/api/instituicoes/route.ts
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const insts = await prisma.instituicao_ensino.findMany()
-  return NextResponse.json(insts)
+  try {
+    const insts = await prisma.instituicao_ensino.findMany({
+      select: { id: true, nome: true },
+      orderBy: { nome: 'asc' },
+    })
+    return NextResponse.json(insts)
+  } catch (err) {
+    console.error('Erro ao buscar instituições:', err)
+    return NextResponse.json({ error: 'Erro ao carregar instituições.' }, { status: 500 })
+  }
 }
 
 export async function POST(request: Request) {
   const data = await request.json()
-  const created = await prisma.instituicao_ensino.create({ data })
-  return NextResponse.json(created, { status: 201 })
+  try {
+    const created = await prisma.instituicao_ensino.create({ data })
+    return NextResponse.json(created, { status: 201 })
+  } catch (err) {
+    console.error('Erro ao criar instituição:', err)
+    return NextResponse.json({ error: 'Erro ao criar instituição.' }, { status: 500 })
+  }
 }

@@ -1,4 +1,4 @@
-// src/app/dashboard/DashboardClient.tsx
+// src/app/dashboard/DashboardInstituicao.tsx
 'use client'
 
 import React, { useMemo } from 'react'
@@ -27,7 +27,7 @@ const parceriaData = [
   { name: 'Concluídas', value: 6 },
 ]
 
-export default function DashboardClient() {
+export default function DashboardInstituicao() {
   const pieColors = ['#4F46E5', '#E5E7EB']
 
   return (
